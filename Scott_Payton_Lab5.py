@@ -1,6 +1,7 @@
 import requests
 import os
 import sys
+import random
 
 API_URL = os.getenv ("API_URL", "http://dragonball-api.com/api/characters")
 
@@ -60,10 +61,53 @@ def show_by_race(data):
     else:
         print("No characters found for that Race.")
 
+
+def random_character(data):
+    """Generate a Random Character."""
+    char = random.choice(data)
+    print(f"\n=== Random Character ===")
+    print(f"Name: {char.get('name', 'Unknown')}")
+
     
 def main():
     print("Welcome to the DragonBall Character Database! \n What would you like to do?!")
 
+    data = fetch_characters()
+    if not data:
+        print ("Could Not Fetch Character Data")
+        return
+    
+
+    while True:
+        print("\nMenu:")
+        print("1. Search for a character by name")
+        print("2. Copare Power Levels")
+        print("3. Show characters based on race")
+        print("4. Generate a random character")
+        print("5. Exit")
+
+        choice = input("Enter your choice (1-5): ").strip()
+
+        if choice == '1':
+            name = input("Enter Character Name: ").strip()
+            results = search_by_name(data,name)
+            if results:
+                print("\n Results: ")
+                for char in results:
+                    print(f"- {char.get('name', 'Unknown')}")
+            else:
+                print("No characters found with that name.")
+        elif choice == '2':
+            compare_power(data)
+        elif choice == '3':
+            show_by_race(data)
+        elif choice == '4':
+            random_character(data)
+        elif choice == '5':
+            print("Exiting the program. Goodbye!")
+            break
+        else:
+            print("Invalid choice. Please try again.")
     
 if __name__ == "__main__":
     main()
