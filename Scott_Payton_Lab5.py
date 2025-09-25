@@ -47,8 +47,20 @@ def compare_power(data):
     else:
         print("\n They have equal power!")
 
-    
 
+def show_by_race(data):
+    """Show characters based on their Race."""
+    race_name = input("Enter the Race name (e.g., Saiyan, Namekian, Human): ").strip()
+    race_chars = [char for char in data if race_name.lower() in str(char.get("race", "")).lower()]
+
+    if race_chars:
+        print(f"\n=== Characters of Race: {race_name} ===")
+        for char in race_chars:
+            print(f"- {char.get('name', 'Unknown')}")
+    else:
+        print("No characters found for that Race.")
+
+    
 def main():
     print("Welcome to the DragonBall Character Database! \n What would you like to do?!")
 
