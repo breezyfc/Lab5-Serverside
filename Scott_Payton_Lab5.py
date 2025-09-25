@@ -11,4 +11,10 @@ if response.status_code == 200:
 else:
     print("Error:", response.status_code)
 
+
+def main():
+    print("Welcome to the DragonBall Character Database! \n Here youa are able to do many things, elts get started!")
     
+
+if __name__ == "__main__":
+    main()
