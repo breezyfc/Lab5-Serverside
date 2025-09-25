@@ -1,23 +1,38 @@
 import requests
 import os
-import sys
 import random
 
-API_URL = os.getenv ("API_URL", "http://dragonball-api.com/api/characters")
+# API endpoint
+API_URL = os.getenv("API_URL", "http://dragonball-api.com/api/characters")
 
 def fetch_characters():
-    """Fetch the characters from the API."""
+    """Fetch character data from the API and return the list of characters."""
     response = requests.get(API_URL)
     if response.status_code == 200:
-        return response.json()
+        data = response.json()
+        if isinstance(data, dict) and "items" in data:
+            return data["items"]
+        return data
     else:
-        print("Failed to fetch characters.")
-        sys.exit(1)
+        print("Error:", response.status_code)
+        return []
+
+def show_character_details(char):
+    """Print all available details about a character."""
+    print("\n=== Character Details ===")
+    for key, value in char.items():
+        print(f"{key.capitalize()}: {value}")
+    print("=========================\n")
 
 def search_by_name(data, name):
-    """Search For Character By Name"""
-    results = [char for char in data if name.lower() in char['name'].lower()]
-    return results
+    """Search for a character by name (case-insensitive)."""
+    results = [char for char in data if name.lower() in char.get("name", "").lower()]
+
+    if results:
+        for char in results:
+            show_character_details(char)  
+    else:
+        print("No characters found.")
 
 def compare_power(data):
     """Compare power levels of two characters by name."""
@@ -35,19 +50,18 @@ def compare_power(data):
     print(f"{char2['name']} (Max Ki: {char2.get('maxKi', 'Unknown')})")
 
     try:
-        ki1 = int(char1.get("maxKi", "0").replace(",", ""))
-        ki2 = int(char2.get("maxKi", "0").replace(",", ""))
+        ki1 = int(str(char1.get("maxKi", "0")).replace(",", ""))
+        ki2 = int(str(char2.get("maxKi", "0")).replace(",", ""))
     except ValueError:
-        print("Error: Could not compare power levels.")
+        print("Error: Could not compare power levels (invalid values).")
         return
 
     if ki1 > ki2:
-        print(f"\n {char1['name']} is stronger!")
+        print(f"\n{char1['name']} is stronger!")
     elif ki2 > ki1:
-        print(f"\n {char2['name']} is stronger!")
+        print(f"\n{char2['name']} is stronger!")
     else:
-        print("\n They have equal power!")
-
+        print("\nThey have equal power!")
 
 def show_by_race(data):
     """Show characters based on their Race."""
@@ -57,57 +71,51 @@ def show_by_race(data):
     if race_chars:
         print(f"\n=== Characters of Race: {race_name} ===")
         for char in race_chars:
-            print(f"- {char.get('name', 'Unknown')}")
+            show_character_details(char)
     else:
         print("No characters found for that Race.")
 
-
 def random_character(data):
-    """Generate a Random Character."""
-    char = random.choice(data)
-    print(f"\n=== Random Character ===")
-    print(f"Name: {char.get('name', 'Unknown')}")
+    """Generate a random character."""
+    if not data:
+        print("No data available.")
+        return
 
-    
+    char = random.choice(data)
+    show_character_details(char)
+
 def main():
-    print("Welcome to the DragonBall Character Database! \n What would you like to do?!")
+    print("Welcome to the DragonBall Character Database!")
 
     data = fetch_characters()
     if not data:
-        print ("Could Not Fetch Character Data")
+        print("Could not fetch characters. Exiting.")
         return
-    
 
     while True:
-        print("\nMenu:")
+        print("\nWhat would you like to do?")
         print("1. Search for a character by name")
-        print("2. Copare Power Levels")
-        print("3. Show characters based on race")
+        print("2. Compare the power of two characters")
+        print("3. Show characters based on their Race")
         print("4. Generate a random character")
         print("5. Exit")
 
         choice = input("Enter your choice (1-5): ").strip()
 
-        if choice == '1':
-            name = input("Enter Character Name: ").strip()
-            results = search_by_name(data,name)
-            if results:
-                print("\n Results: ")
-                for char in results:
-                    print(f"- {char.get('name', 'Unknown')}")
-            else:
-                print("No characters found with that name.")
-        elif choice == '2':
+        if choice == "1":
+            name = input("Enter character name: ").strip()
+            search_by_name(data, name)
+        elif choice == "2":
             compare_power(data)
-        elif choice == '3':
+        elif choice == "3":
             show_by_race(data)
-        elif choice == '4':
+        elif choice == "4":
             random_character(data)
-        elif choice == '5':
-            print("Exiting the program. Goodbye!")
+        elif choice == "5":
+            print("Goodbye!")
             break
         else:
-            print("Invalid choice. Please try again.")
-    
+            print("Invalid choice, please try again.")
+
 if __name__ == "__main__":
     main()
